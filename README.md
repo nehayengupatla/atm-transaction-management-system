@@ -101,16 +101,16 @@ http://localhost:8080/swagger-ui/index.html
 
 ## Running the Application
 1. Clone the repository using Git Bash or Terminal.
-    git clone https://github.com/nehayengupatla/atm-transaction-management-system.git
+   git clone https://github.com/nehayengupatla/atm-transaction-management-system.git
 
-2. Set the required environment variables:
+3. Set the required environment variables:
    - DB_USERNAME
    - DB_PASSWORD
    - JWT_SECRET
 
-3. Run the application.
+4. Run the application.
 
-4. Access Swagger UI.
+5. Access Swagger UI.
    http://localhost:8080/swagger-ui/index.html
 
 
