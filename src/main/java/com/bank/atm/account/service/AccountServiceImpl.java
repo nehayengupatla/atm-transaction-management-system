@@ -40,6 +40,11 @@ public class AccountServiceImpl implements AccountService {
                 .orElseThrow(() ->
                         new CustomerNotFoundException("Customer not found with id: " + requestDto.getCustomerId()));
 
+        // check whether customer already has an account
+        if(accountRepository.existsByCustomer(customer)){
+            throw new AccountAlreadyExistsException("Customer already has an account");
+        }
+
         // create Account Entity
         Account account = Account.builder()
                 .accountNumber(requestDto.getAccountNumber())
