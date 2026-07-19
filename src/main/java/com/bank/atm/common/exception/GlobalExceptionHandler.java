@@ -1,15 +1,24 @@
 package com.bank.atm.common.exception;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    // Logger for recording exception details.
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // Account Not Found Exception
     @ExceptionHandler(AccountNotFoundException.class)
@@ -65,23 +74,24 @@ public class GlobalExceptionHandler {
     }
 
 
-    // validation exception
+    // MethodArgumentNotValidException handling
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorResponse> handleValidationException(
-            MethodArgumentNotValidException methodArgumentNotValidException) {
+    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException exception) {
 
+        Map<String, String> response = new HashMap<>();
 
-        // Get Validation Error Message
-        String message = methodArgumentNotValidException.getBindingResult()
-                .getFieldError()
-                .getDefaultMessage();
+        List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
 
+        for (FieldError fieldError : fieldErrors) {
 
-        // Return Error Response
-        return new ResponseEntity<>(
-                buildErrorResponse(HttpStatus.BAD_REQUEST, message),
-                HttpStatus.BAD_REQUEST
-        );
+            response.put(
+                    fieldError.getField(),
+                    fieldError.getDefaultMessage()
+            );
+        }
+
+        return ResponseEntity.badRequest().body(response);
     }
 
 
@@ -135,6 +145,20 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(buildErrorResponse(HttpStatus.BAD_REQUEST,
                 invalidTransferException.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+
+    // Generic Exception handling
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorResponse> handleGenericException(Exception exception) {
+
+        logger.error("Unexpected exception occurred.", exception);
+
+        return new ResponseEntity<>(
+                buildErrorResponse(
+                        HttpStatus.INTERNAL_SERVER_ERROR,
+                        "An unexpected error occurred. Please try again later."),
+                HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
